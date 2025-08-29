@@ -97,3 +97,15 @@ When you call `.fit()`, SageMaker will:
 - Run your `train.py` script on each of the 4 GPUs of the `ml.p3.8xlarge` instance.
 
 This setup demonstrates a clean, professional approach to organizing a PyTorch DDP project for both local development and cloud deployment on SageMaker.
+
+## Performance Analysis and Takeaways
+
+1.  The average time per epoch for single-node training was 12.302 seconds. For Distributed Data Parallel (DDP) training, the average times were as follows: 9.045 seconds per epoch with 2 GPUs and 5.894 seconds per epoch with 4 GPUs. This means that using 2 GPUs reduced the training time by 3.257 seconds per epoch compared to single-node training, while using 4 GPUs reduced the training time by 6.408 seconds per epoch compared to the single-node setup and 3.151 seconds compared to the 2-GPU training. Thus, using distributed accelerators significantly speeds up the training process per epoch.
+
+2.  Increasing the number of GPUs from 2 to 4 decreased the training time by 3.151 seconds, which is approximately a 34% reduction when doubling the number of GPUs. While this is a significant speedup, the performance scaling is not linear. This is evident in our data, as the time saved when increasing the GPUs from 1 to 2 is roughly the same as when increasing from 2 to 4. One reason for this is the increased load from synchronizing gradients across multiple GPUs. Specifically, the NCCL library uses operations such as AllReduce, which leads to communication overhead. Since communication is relatively slower than computation, it becomes a bottleneck that worsens as more GPUs are added. This explains why the performance gains are not linear.
+
+3.  Initially, when we used DDP to train and test the neural network, the accuracy was not consistent with the results from single-node training. After debugging, we discovered that the test function was not testing properly across multiple GPUS. To resolve this, we decided to use a single GPU for testing the neural network, which corrected the issue.
+
+Additionally, as we scale training with more GPUs, the communication overhead due to gradient synchronization becomes a significant factor, as mentioned earlier. With more GPUs, the communication overhead increases, reducing speed gains. Furthermore, the likelihood of one machine stalling or lagging behind others increases, creating another bottleneck in the training process and a limitation of DDP as we scale to more machines.
+
+For distributing work, we met either in person or online and collaborated on the project together.
