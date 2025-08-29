@@ -107,5 +107,3 @@ This setup demonstrates a clean, professional approach to organizing a PyTorch D
 3.  Initially, when we used DDP to train and test the neural network, the accuracy was not consistent with the results from single-node training. After debugging, we discovered that the test function was not testing properly across multiple GPUS. To resolve this, we decided to use a single GPU for testing the neural network, which corrected the issue.
 
 Additionally, as we scale training with more GPUs, the communication overhead due to gradient synchronization becomes a significant factor, as mentioned earlier. With more GPUs, the communication overhead increases, reducing speed gains. Furthermore, the likelihood of one machine stalling or lagging behind others increases, creating another bottleneck in the training process and a limitation of DDP as we scale to more machines.
-
-For distributing work, we met either in person or online and collaborated on the project together.
